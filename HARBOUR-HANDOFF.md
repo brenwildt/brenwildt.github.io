@@ -48,7 +48,17 @@ Four phases shipped and verified (endpoint 200s + clean esbuild transpile of har
 3. **Metrics** — `db/api.ts`: `getEnergyHistory`, `getHabitHistory` (computes count/currentStreak/longestStreak server-side), `getOneThingHistory`; route `GET /api/metrics`; `MetricsScreen` with Sparkline energy trend, per-habit streak stats, One Thing history. Lazy-fetches on mount.
 4. **Home + Habits tab** — `HomeScreen` renders the Notion list grouped by category (verified: 19 real items). Habits tab shows a 4-week `HabitHeatmap` (28 cells, 7/row, today tappable); `Habits` takes a `wide` prop; `app.tsx` builds both `days` (7) and `history` (28) per habit from one fetch; both stay in sync on toggle.
 
-## Approved fix list (user-approved; implement in this order)
+## Approved fix list — ✅ ALL APPLIED (2026-07-19)
+
+Every item below (P0/P1/P2) is implemented, deployed, and verified against the
+live endpoint. Do NOT redo them. Notable deltas from the spec: client modules
+are now served pre-compiled from `/x.js` routes (server-side Babel, cached per
+isolate; legacy `/x.jsx` raw routes retained), boot is one `GET /api/bootstrap`
+call, the Notion fetch is cached 60s and items carry block `id`s, and
+`POST /api/notion/home-list/:blockId/check` writes check-offs back to Notion.
+A cross-page section-heading bug in the Notion pagination was also fixed.
+
+## Original fix list (kept for reference; implement in this order)
 
 ### P0-1: UTC day-boundary bug (most important)
 Everything is keyed to UTC dates (`toISOString().slice(0,10)` client-side, `date('now')` in SQLite). User is US Eastern → the app's "day" flips at 8pm EDT, corrupting evening logs/habit ticks/streaks at exactly the time the app is used.
